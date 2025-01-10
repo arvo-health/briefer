@@ -1,5 +1,5 @@
 # Set this to false if you are using an external Postgres database (recommended)
-enableLocalPostgres: true
+enableLocalPostgres: false
 
 ai:
   enabled: true
@@ -25,8 +25,7 @@ ai:
   secrets:
     aiApiUsername: ai-basic-username
     aiApiPassword: ai-basic-password
-    openAiApiKey: your_openai_api_key
-
+    openAiApiKey: ''
   # affinity:
   #   nodeAffinity:
   #     requiredDuringSchedulingIgnoredDuringExecution:
@@ -86,35 +85,39 @@ api:
 
   resources:
     requests:
-      cpu: 1
-      memory: 4Gi
+      cpu: 8
+      memory: 16Gi
     limits:
-      cpu: 1
-      memory: 4Gi
+      cpu: 10
+      memory: 20Gi
 
   env:
     # update these two URLs with your ingress URLs
-    frontendUrl: http://localhost:4000
-    apiUrl: http://localhost:8080
+    frontendUrl: https://briefer.arvohealth.com
+    apiUrl: https://briefer-api.arvohealth.com
     logLevel: info
-    postgresHostname: postgres
+    jupyterRepository: docker.io
+    jupyterImage: briefer/enterprise/jupyter
+    jupyterTag: v566
+    jupyterPort: 8888
     postgresPort: 5432
     postgresDatabase: briefer
     aiApiUrl: http://ai:8080
     allowHttp: 'false'
 
   secrets:
-    postgresUsername: postgres
-    postgresPassword: password
+    postgresHostname: ref+gcpsecrets://arvo-datalake/briefer_prod?#/db_host
+    postgresUsername: ref+gcpsecrets://arvo-datalake/briefer_prod?#/db_user
+    postgresPassword: ref+gcpsecrets://arvo-datalake/briefer_prod?#/db_password
     # Change these values to your own by running the indicated command
     # or just leave these empty and the chart will generate random values for you
-    jupyterToken: '' # openssl rand -hex 32
-    authJwtSecret: '' # openssl rand -hex 32
-    loginJwtSecret: '' # openssl rand -hex 32
-    datasourcesEncryptionKey: '' # openssl rand -hex 32
-    environmentVariablesEncryptionKey: '' # openssl rand -hex 32
-    integrationsConfigEncryptionKey: '' # openssl rand -hex 32
-    workspaceSecretsEncryptionKey: '' # openssl rand -hex 32
+    jupyterToken: '091266d895fbfb5a3b33897bbd2d018362d1fc2c8e8f34894d2ef4b1445030da' # openssl rand -hex 32
+    authJwtSecret: '4181047310fd91bfa70337b9ea3c049921e9e172f78612565f69cfe49b056f26' # openssl rand -hex 32
+    loginJwtSecret: 'a1de3d08acbc392231c962d5ff3c549b518de25841a0a0c4ba6becaa2fc61b9b' # openssl rand -hex 32
+    datasourcesEncryptionKey: '6ad176c1a27e2aec4d385de15baec196dcf40e1ae070c61711a77eaa97d15da9' # openssl rand -hex 32
+    environmentVariablesEncryptionKey: '92490ff65354028421f2bdf665b75c76482651fbec62a8107339e832fcefb4bc' # openssl rand -hex 32
+    integrationsConfigEncryptionKey: '4c4f6948c2ade18709e573be2a777452f2dc09fa2587ab1bdd21d11abdf7630f' # openssl rand -hex 32
+    workspaceSecretsEncryptionKey: 'e885fa2e04b44e5bcf1d4cc4240da2bf99a94282468085eaae6da03e6c0f6625' # openssl rand -hex 32
 
   # affinity:
   #   nodeAffinity:
@@ -139,11 +142,11 @@ jupyter:
 
   resources:
     requests:
-      cpu: 1
-      memory: 4Gi
+      cpu: 4
+      memory: 16Gi
     limits:
-      cpu: 1
-      memory: 4Gi
+      cpu: 6
+      memory: 18Gi
 
   image:
     repository: docker.io
@@ -165,3 +168,37 @@ jupyter:
   #               operator: In
   #               values:
   #                 - jupyter
+
+ingressweb:
+  enabled: true
+  className: "nginx"
+  annotations:
+    kubernetes.io/tls-acme: "true"
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    kubernetes.io/ingress.class: nginx
+  hosts:
+    - host: briefer.arvohealth.com
+      paths:
+        - path: /
+          pathType: ImplementationSpecific
+  tls:
+   - secretName: web-tls
+     hosts:
+       - briefer.arvohealth.com
+
+ingressapi:
+  enabled: true
+  className: "nginx"
+  annotations:
+    kubernetes.io/tls-acme: "true"
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    kubernetes.io/ingress.class: nginx
+  hosts:
+    - host: briefer-api.arvohealth.com
+      paths:
+        - path: /
+          pathType: ImplementationSpecific
+  tls:
+   - secretName: api-tls
+     hosts:
+       - briefer-api.arvohealth.com

@@ -43,7 +43,10 @@ spec:
                   name: api-secrets
                   key: postgresPassword
             - name: POSTGRES_HOSTNAME
-              value: '{{ .Values.api.env.postgresHostname }}'
+              valueFrom:
+                secretKeyRef:
+                  name: api-secrets
+                  key: postgresHostname
             - name: POSTGRES_PORT
               value: '{{ .Values.api.env.postgresPort }}'
             - name: POSTGRES_DATABASE
@@ -114,7 +117,10 @@ spec:
                   name: api-secrets
                   key: postgresPassword
             - name: POSTGRES_HOSTNAME
-              value: '{{ .Values.api.env.postgresHostname }}'
+              valueFrom:
+                secretKeyRef:
+                  name: api-secrets
+                  key: postgresHostname
             - name: POSTGRES_PORT
               value: '{{ .Values.api.env.postgresPort }}'
             - name: POSTGRES_DATABASE
