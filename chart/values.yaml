@@ -8,7 +8,7 @@ ai:
   image:
     repository: docker.io
     name: briefercloud/briefer-ai
-    tag: v0.0.88
+    tag: v0.0.98
     pullPolicy: Always
 
   resources:
@@ -46,7 +46,7 @@ web:
   image:
     repository: docker.io
     name: briefercloud/briefer-web
-    tag: v0.0.88
+    tag: v0.0.98
     pullPolicy: Always
 
   # optional
@@ -75,21 +75,21 @@ web:
   #     effect: 'NoSchedule'
 
 api:
-  replicaCount: 1
+  replicaCount: 2
 
   image:
     repository: docker.io
     name: briefercloud/briefer-api
-    tag: v0.0.88
+    tag: v0.0.98
     pullPolicy: Always
 
   resources:
     requests:
-      cpu: 8
-      memory: 16Gi
+      cpu: 1
+      memory: 4Gi
     limits:
-      cpu: 10
-      memory: 20Gi
+      cpu: 1
+      memory: 4Gi
 
   env:
     # update these two URLs with your ingress URLs
@@ -151,7 +151,7 @@ jupyter:
   image:
     repository: docker.io
     name: briefercloud/briefer-jupyter
-    tag: v0.0.88
+    tag: v0.0.98
     pullPolicy: Always
 
   # tolerations:
@@ -193,6 +193,10 @@ ingressapi:
     kubernetes.io/tls-acme: "true"
     cert-manager.io/cluster-issuer: letsencrypt-prod
     kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/affinity: cookie
+    nginx.ingress.kubernetes.io/session-cookie-expires: "172800"
+    nginx.ingress.kubernetes.io/session-cookie-max-age: "172800"
+    nginx.ingress.kubernetes.io/session-cookie-name: http-cookie
   hosts:
     - host: briefer-api.arvohealth.com
       paths:
